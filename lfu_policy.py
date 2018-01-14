@@ -1,43 +1,17 @@
 import logging
+from policy import Policy, CacheManager, Cache
 
-class LFU_Policy:
+
+class LFU_Policy(Policy):
     def __init__(self, num_caches, cache_size, num_items):
-        self.cacheManager = LFU_CacheManager(num_caches, cache_size, num_items)
-        logging.basicConfig(level=logging.DEBUG)
-        self.num_misses = 0
-        self.req_count = 0
-
-    def execute_request(self, new_request):
-        result = self.cacheManager.access(new_request)
-        logging.info(" Item: %s, Cached: %s", str(new_request), str(result[0]))
-
-        self.req_count += 1
-        self.num_misses += not(result[0])
-        if not result[0]:
-            logging.info(" Evicted item is %s", str(result[1]))
-        logging.info(" Miss Rate is %s", str(self.num_misses / self.req_count))
+        super(LFU_Policy, self).__init__(num_caches, cache_size, num_items, LFU_CacheManager)
 
 
-class LFU_CacheManager:
+class LFU_CacheManager(CacheManager):
     def __init__(self, num_caches, cache_size, num_items):
-        self.num_caches = num_caches
-        self.cache_size = cache_size
-        self.num_items = num_items
-        self.caches = [LFU_Cache(cache_size) for i in range(num_caches)]
-        self.init_caches()
+        super(LFU_CacheManager, self).__init__(num_caches, cache_size, num_items, LFU_Cache)
 
-    def init_caches(self):
-        for i in range(self.num_items):
-            self.caches[i % self.num_caches].insert(i)
-
-    def is_cached(self, item):
-        return self.caches[item % self.num_caches].is_cached(item)
-
-    def access(self, new_item):
-        return self.caches[new_item % self.num_caches].access(new_item)
-
-
-class LFU_Cache:
+class LFU_Cache(Cache):
     def __init__(self, cache_size):
         self.size = cache_size
         self.count = 0

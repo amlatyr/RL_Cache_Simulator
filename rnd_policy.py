@@ -1,44 +1,16 @@
 import logging
 import random
+from policy import Policy, CacheManager, Cache
 
-class RND_Policy:
+class RND_Policy(Policy):
     def __init__(self, num_caches, cache_size, num_items):
-        self.cacheManager = RND_CacheManager(num_caches, cache_size, num_items)
-        logging.basicConfig(level=logging.DEBUG)
-        self.num_misses = 0
-        self.req_count = 0
+        super(RND_Policy, self).__init__(num_caches, cache_size, num_items, RND_CacheManager)
 
-    def execute_request(self, new_request):
-        result = self.cacheManager.access(new_request)
-        logging.info(" Item: %s, Cached: %s", str(new_request), str(result[0]))
-
-        self.req_count += 1
-        self.num_misses += not(result[0])
-        if not result[0]:
-            logging.info(" Evicted item is %s", str(result[1]))
-        logging.info(" Miss Rate is %s", str(self.num_misses / self.req_count))
-
-
-class RND_CacheManager:
+class RND_CacheManager(CacheManager):
     def __init__(self, num_caches, cache_size, num_items):
-        self.num_caches = num_caches
-        self.cache_size = cache_size
-        self.num_items = num_items
-        self.caches = [RND_Cache(cache_size) for i in range(num_caches)]
-        self.init_caches()
+        super(RND_CacheManager, self).__init__(num_caches, cache_size, num_items, RND_Cache)
 
-    def init_caches(self):
-        for i in range(self.num_items):
-            self.caches[i % self.num_caches].insert(i)
-
-    def is_cached(self, item):
-        return self.caches[item % self.num_caches].is_cached(item)
-
-    def access(self, new_item):
-        return self.caches[new_item % self.num_caches].access(new_item)
-
-
-class RND_Cache:
+class RND_Cache(Cache):
     def __init__(self, cache_size):
         self.size = cache_size
         self.count = 0

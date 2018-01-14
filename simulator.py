@@ -28,7 +28,7 @@ if __name__ == "__main__":
     num_caches = int(sys.argv[4])
     num_requests = int(sys.argv[5])
     requester = Requester(num_item, alpha)
-    policy = RND_Policy(num_caches, cache_size, num_item)
+    policy = LRU_Policy(num_caches, cache_size, num_item)
     sim = Simulator(requester, policy, num_item, cache_size, num_caches, num_requests)
     sim.run()
     print(num_item, alpha, cache_size, num_caches, num_requests)
